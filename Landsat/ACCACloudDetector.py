@@ -15,7 +15,8 @@ import sys
 from textwrap import dedent
 from arcpy.sa import *
 arcpy.env.overwriteOutput = True
-arcpy.env.scratchWorkspace="C:\\Users\\qgeddes\\Downloads\\Landsat\\GapFiller\\Test"
+
+
 try:
     import numpy as np
 
@@ -42,17 +43,6 @@ except:
 
 import os
 arcpy.CheckOutExtension("Spatial")
-##Band2path="C:\\Users\\qgeddes\\Downloads\\Landsat\\Cloudtest\\Alabama\\LE70190392012129EDC00_B2.TIF"
-##Band3path="C:\\Users\\qgeddes\\Downloads\\Landsat\\Cloudtest\\Alabama\\LE70190392012129EDC00_B3.TIF"
-##Band4path="C:\\Users\\qgeddes\\Downloads\\Landsat\\Cloudtest\\Alabama\\LE70190392012129EDC00_B4.TIF"
-##Band5path="C:\\Users\\qgeddes\\Downloads\\Landsat\\Cloudtest\\Alabama\\LE70190392012129EDC00_B5.TIF"
-##Band6path="C:\\Users\\qgeddes\\Downloads\\Landsat\\Cloudtest\\Alabama\\LE70190392012129EDC00_B6_VCID_1.TIF"
-##pixelvalue="Digital Numbers"
-##MetaData="C:\\Users\\qgeddes\\Downloads\\Landsat\\Cloudtest\\Alabama\\LE70190392012129EDC00_MTL.txt"
-##OutputFolder="C:\\Users\\qgeddes\\Downloads\\Landsat\\Cloudtest\\Test1"
-##OutputFileName="ACCAtestNodata.tif"
-##Filter5Thresh=2.5
-##Filter6Thresh=2.5
 
 Band2path=arcpy.GetParameterAsText(0)
 Band3path=arcpy.GetParameterAsText(1)
@@ -69,6 +59,7 @@ Filter6Thresh=float(arcpy.GetParameterAsText(10))
 
 L7bands=[Band2path,Band3path,Band4path,Band5path,Band6path]
 
+arcpy.env.scratchWorkspace=OutputFolder
 if pixelvalue=="Digital Numbers":
     arcpy.AddMessage("Calculating Reflectance...")
     newMeta=['LANDSAT_SCENE_ID = "','DATE_ACQUIRED = ',"SUN_ELEVATION = ",
@@ -338,5 +329,6 @@ Cloudmask=(Cloudmask*GapMask)==0
 
 Cloudmask.save(OutputFolder+"\\"+OutputFileName)
 del Cloudmask,GapMask
+
 os.remove(OutputFolder+"\\GapMask.tif")
 arcpy.CheckInExtension("Spatial")
