@@ -25,11 +25,7 @@ OutputFolder= arcpy.GetParameterAsText(6)
 OutputFile=   arcpy.GetParameterAsText(7)
 
 arcpy.env.scratchWorkspace=OutputFolder
-##
-##FirstScene=     arcpy.Raster("C:\\Users\\qgeddes\\Downloads\\Landsat\\GapFiller\\2013_073\\LE70290302013073EDC00_B1.tif")
-##CloudMask1= arcpy.Raster("C:\\Users\\qgeddes\\Downloads\\Landsat\\GapFiller\\2013_073\\ACCA_CloudMask_089.tif")
-##SecondScene=    arcpy.Raster("C:\\Users\\qgeddes\\Downloads\\Landsat\\GapFiller\\2013_089\\LE70290302013089EDC00_B1.tif")
-##CloudMask2=arcpy.Raster("C:\\Users\\qgeddes\\Downloads\\Landsat\\GapFiller\\2013_089\\ACCA_2_089.tif")
+
 
 Mask1=Scene1>0
 Mask2=Scene2>0
