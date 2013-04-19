@@ -1,1 +1,2 @@
-This toolbox contains script tools for ArcGIS written in Python. The tool execute various remote sensing processes.
+This toolbox contains script tools for ArcGIS written in Python. The tools execute various remote sensing processes.
+To use the toolboxes, download the files as a zipped file. Unzip and navigate to the folder in ArcCatalog. The toolbox should appear.

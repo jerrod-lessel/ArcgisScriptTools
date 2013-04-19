@@ -32,6 +32,21 @@ OutputFileName=arcpy.GetParameterAsText(7)
 
 L7bands=[Band1path,Band3path,Band4path,Band5path]
 
+arcpy.env.scratchWorkspace=OutputFolder
+
+#checking if the file extension is appropriate and making alterations if necessary
+FileNameSplit=OutputFileName.split(".")
+if FileNameSplit[-1] not in ["tif","img"]:
+    arcpy.AddWarning("Output Image must be saved in either the .tif or .img file format. Sorry, blame Esri. File has been change to .tif")
+    if len(FileNameSplit)==1:
+        OutputFileName+=".tif"
+    else:
+        FileNameSplit[-1]="tif"
+        OutputFileName=".".join(FileNameSplit)
+
+
+
+
 if pixelvalue=="Digital Numbers":
     arcpy.AddMessage("Calculating Reflectance...")
     newMeta=['LANDSAT_SCENE_ID = "','DATE_ACQUIRED = ',"SUN_ELEVATION = ",
@@ -116,6 +131,8 @@ elif pixelvalue=="Reflectance":
         exec("Band{0}=arcpy.Raster(pathname)".format(["1","3","4","5"][i]))
 arcpy.AddMessage("Creating Gap Mask")
 ##GapMask=
+GapMask=((Band1>0)*(Band3>0)*(Band4>0)*(Band5>0))
+
 
 arcpy.AddMessage("Beginning LTK algorithm")
 #Begin of LTK Algorithm---------------------------------------------------------
@@ -145,7 +162,7 @@ Amb=Amb*(Water==0)
 maxB1_B3=((Band1>=Band3)*Band1)+((Band3>Band1)*Band3)
 Clouds=Amb*( (((Band1>.15)+(Band3>.18))>0) * (Band5>.12)* (maxB1_B3>(Band5*.67)))
 
-#set all cloud pixels to "NODATA" and all other pixels to 1
-CloudMask=arcpy.sa.Abs(Clouds-1)
+#set all cloud pixels to 0 and all good pixels to 1. And apply the gap mask
+CloudMask=((Clouds*GapMask)==0)
 
 CloudMask.save(OutputFolder+"\\"+OutputFileName)

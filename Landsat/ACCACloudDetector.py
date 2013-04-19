@@ -59,7 +59,18 @@ Filter6Thresh=float(arcpy.GetParameterAsText(10))
 
 L7bands=[Band2path,Band3path,Band4path,Band5path,Band6path]
 
+#checking if the file extension is appropriate and making alterations if necessary
+FileNameSplit=OutputFileName.split(".")
+if FileNameSplit[-1] not in ["tif","img"]:
+    arcpy.AddWarning("Output Image must be saved in either the .tif or .img file format. Sorry, blame Esri. File has been change to .tif")
+    if len(FileNameSplit)==1:
+        OutputFileName+=".tif"
+    else:
+        FileNameSplit[-1]="tif"
+        OutputFileName=".".join(FileNameSplit)
+
 arcpy.env.scratchWorkspace=OutputFolder
+
 if pixelvalue=="Digital Numbers":
     arcpy.AddMessage("Calculating Reflectance...")
     newMeta=['LANDSAT_SCENE_ID = "','DATE_ACQUIRED = ',"SUN_ELEVATION = ",
