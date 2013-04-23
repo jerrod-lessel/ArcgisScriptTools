@@ -60,7 +60,7 @@ elif "5" in spacecraft:
 elif "4" in spacecraft:
     ESun=L4_ESun
 else:
-    arcpy.AddError("This tool only works for Landsat 4, 5, or 7")
+    arcpy.AddError("This tool only works for Landsat 4, 5, or 7. This data appears to be from {0}".format(spacecraft))
     sys.exit()
 
 if float(year) % 4 ==0:
