@@ -3,10 +3,9 @@
 # Purpose:     This tool grids and georeferences VIIRS HDF data files from
 #              the NOAA CLASS website
 # Author:     Quinten Geddes Quinten.A.Geddes@nasa.gov
-#
+#               NASA DEVELOP Program
 # Created:     09/15/2012
-# Copyright:   (c)
-# Licence:     <your licence>
+
 #-------------------------------------------------------------------------------
 
 import numpy
@@ -260,8 +259,8 @@ for band in bands:
         nodata="blockz<65520"
     else:
         nodata="blockz>-999"
-
     interpcount=0
+
     for i in range(0, rows, blockSize):
         if (i + blockSize) < rows:
             numRows = blockSize
@@ -300,19 +299,21 @@ for band in bands:
     if not interpcount:
         arcpy.AddError("No data found within the specified extent")
         raise arcpy.ExecuteError
-    #Attempting to apply a scale to the dataset to attain the correct pixel units
 
+    #Attempting to apply a scale to the dataset to attain the physical values for pixels
     try:
-        Scale= f["/{0}/{1}/{2}Factors".format(hdfind1,band,ArrayName)][0]
+        ScaleArray=f["/{0}/{1}/{2}Factors".format(hdfind1,band,ArrayName)]
+        Scale, Constant= ScaleArray[0],ScaleArray[1]
         arcpy.AddMessage("Pixel Unit Scale Factor Applied")
     except:
         try:
-            Scale= f["/{0}/{1}/{2}_Factors".format(hdfind1,band,ArrayName)][0]
+            ScaleArray= f["/{0}/{1}/{2}_Factors".format(hdfind1,band,ArrayName)]
+            Scale, Constant= ScaleArray[0],ScaleArray[1]
             arcpy.AddMessage("Pixel Unit Scale Factor Applied")
         except:
-            Scale=1.
+            Scale,Constant=1.,0.
             arcpy.AddMessage("Pixel Unit Scale Factor NOT Applied")
-    OutputArray=(OutputArray>0)*OutputArray*Scale
+    OutputArray=((OutputArray>0)*OutputArray*Scale)+Constant
 
     bandraster = arcpy.NumPyArrayToRaster(OutputArray,pnt, psize,psize,"#")
     arcpy.DefineProjection_management(bandraster, ESPG)

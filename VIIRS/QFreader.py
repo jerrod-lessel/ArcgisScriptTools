@@ -1,12 +1,11 @@
 #-------------------------------------------------------------------------------
-# Name:        module1
-# Purpose:
+# Name:        VIIRS Vegetation Index Quality Flag Reader
+# Purpose:      To read quality flag information that is stored bitwise
 #
-# Author:      qgeddes
+# Author:      Quinten Geddes - NASA DEVELOP Program
 #
 # Created:     14/11/2012
-# Copyright:   (c) qgeddes 2012
-# Licence:     <your licence>
+
 #-------------------------------------------------------------------------------
 import numpy as np
 import arcpy

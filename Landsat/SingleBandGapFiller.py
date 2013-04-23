@@ -1,12 +1,11 @@
 #-------------------------------------------------------------------------------
-# Name:        module1
-# Purpose:
-#
-# Author:      qgeddes
-#
+# Name:        Single Band Gap Filler For Landsat 7
+# Purpose:      To use cloud masks for three seperate scenes to fill gaps in data
+#               due to SLC-induced gaps and clouds
+# Author:      Quinten Geddes   Quinten.A.Geddes@nasa.gov
+#               NASA DEVELOP PRogram
 # Created:     12/04/2013
-# Copyright:   (c) qgeddes 2013
-# Licence:     <your licence>
+
 #-------------------------------------------------------------------------------
 
 import arcpy

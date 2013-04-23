@@ -1,12 +1,12 @@
 #-------------------------------------------------------------------------------
-# Name:        Layer extractor
-# Purpose:
+# Name:        HDF Layer Extractor
+# Purpose:      To extract layers from HDF files created for the 2013 VA Agriculture project
 #
-# Author:      qgeddes
-#
+# Author:       Quinten Geddes    Quinten.A.Geddes@nasa.gov
+#                   NASA DEVELOP Program
 # Created:     22/03/2013
-# Copyright:   (c) qgeddes 2013
-# Licence:     <your licence>
+
+
 #-------------------------------------------------------------------------------
 import arcpy
 import numpy as np

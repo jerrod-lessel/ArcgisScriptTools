@@ -1,12 +1,11 @@
 #-------------------------------------------------------------------------------
-# Name:        module1
-# Purpose:
+# Name:        ACCA Cloud Detector
+# Purpose:      To execute the Automated Cloud Cover Assesment algorithm on Landsat 7 imagery
 #
-# Author:      qgeddes
-#
+# Author:      Quinten Geddes   Quinten.A.Geddes@nasa.gov
+#               NASA DEVELOP Program
 # Created:     13/02/2013
-# Copyright:   (c) qgeddes 2013
-# Licence:     <your licence>
+
 #-------------------------------------------------------------------------------
 from glob import glob
 import arcpy
@@ -44,16 +43,17 @@ except:
 import os
 arcpy.CheckOutExtension("Spatial")
 
-Band2path=arcpy.GetParameterAsText(0)
-Band3path=arcpy.GetParameterAsText(1)
-Band4path=arcpy.GetParameterAsText(2)
-Band5path=arcpy.GetParameterAsText(3)
-Band6path=arcpy.GetParameterAsText(4)
+Band2path=      arcpy.GetParameterAsText(0)
+Band3path=      arcpy.GetParameterAsText(1)
+Band4path=      arcpy.GetParameterAsText(2)
+Band5path=      arcpy.GetParameterAsText(3)
+Band6path=      arcpy.GetParameterAsText(4)
 
-pixelvalue=arcpy.GetParameterAsText(5)
-MetaData=arcpy.GetParameterAsText(6)
-OutputFolder=arcpy.GetParameterAsText(7)
-OutputFileName=arcpy.GetParameterAsText(8)
+pixelvalue=     arcpy.GetParameterAsText(5)
+MetaData=       arcpy.GetParameterAsText(6)
+OutputFolder=   arcpy.GetParameterAsText(7)
+OutputFileName= arcpy.GetParameterAsText(8)
+
 Filter5Thresh=float(arcpy.GetParameterAsText(9))
 Filter6Thresh=float(arcpy.GetParameterAsText(10))
 
@@ -119,7 +119,7 @@ if pixelvalue=="Digital Numbers":
     SZA=90.-float(MText.split(Meta[2])[1].split("\n")[0])
 
 
-    #Calculating values for each band
+    #Calculating Reflectance values for each band
     BandNum=0
 
     for i,pathname in enumerate(L7bands):
@@ -129,7 +129,10 @@ if pixelvalue=="Digital Numbers":
             if BandNum=="6" and spacecraft[8]=="7":
                 BandNum=pathname.split("\\")[-1].split("_B")[1][0:Band6length]
         except:
-            arcpy.AddMessage("\n-------------\nERROR reading Band {0}. Bands must have original names as downloaded.\n-------------\n".format(str(inputbandnum)))
+            arcpy.AddError(dedent("""
+                                  -------------
+                                  ERROR reading Band {0}. Bands must have original names as downloaded.
+                                  -------------""".format(str(inputbandnum))))
             raise arcpy.ExecuteError
         if BandNum[0]!=inputbandnum:
             msg=dedent("""

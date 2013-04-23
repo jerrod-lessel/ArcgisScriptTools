@@ -1,12 +1,11 @@
 #-------------------------------------------------------------------------------
-# Name:        Landsat 7 Digital Numbers to Radiance/Reflectance
-# Purpose:
-#
-# Author:      qgeddes
-#
+# Name:        Landsat Digital Numbers to Radiance/Reflectance
+# Purpose:      To convert landsat 4,5, or 7 pixel values from digital numbers
+#               to Radiance, Reflectance, or Temperature
+# Author:      Quinten Geddes     Quinten.A.Geddes@nasa.gov
+#               NASA DEVELOP Program
 # Created:     19/10/2012
-# Copyright:   (c) qgeddes 2012
-# Licence:     <your licence>
+
 #-------------------------------------------------------------------------------
 import arcpy
 import math

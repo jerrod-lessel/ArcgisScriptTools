@@ -1,3 +1,13 @@
+#-------------------------------------------------------------------------------
+# Name:        Reverb Echo FTP downloader
+# Purpose:      To read the text files with ftp addresses aquired from the Echo Reverb site
+#
+# Author:       Quinten Geddes    Quinten.A.Geddes@nasa.gov
+#                   NASA DEVELOP Program
+# Created:     22/03/2013
+
+#-------------------------------------------------------------------------------
+
 import urllib
 import arcpy
 

@@ -1,12 +1,11 @@
 #-------------------------------------------------------------------------------
-# Name:        module1
-# Purpose:
+# Name:        LTK Cloud Detector
+# Purpose:      To execute the LTK cloud detection algorithm on Landsat 7 imagery
 #
-# Author:      qgeddes
-#
+# Author:      Quinten Geddes     Quinten.A.Geddes
+#               NASA DEVELOP Progra,
 # Created:     15/02/2013
-# Copyright:   (c) qgeddes 2013
-# Licence:     <your licence>
+
 #-------------------------------------------------------------------------------
 from glob import glob
 import arcpy
@@ -15,11 +14,8 @@ import sys
 import os
 import math
 arcpy.CheckOutExtension("Spatial")
-#Band1path="C:\\Users\\qgeddes\\Downloads\\Landsat\\Cloudtest\\Alabama\\LE70190392012129EDC00_B1.TIF"
-#Band3path="C:\\Users\\qgeddes\\Downloads\\Landsat\\Cloudtest\\Alabama\\LE70190392012129EDC00_B3.TIF"
-#Band4path="C:\\Users\\qgeddes\\Downloads\\Landsat\\Cloudtest\\Alabama\\LE70190392012129EDC00_B4.TIF"
-#Band5path="C:\\Users\\qgeddes\\Downloads\\Landsat\\Cloudtest\\Alabama\\LE70190392012129EDC00_B5.TIF"
-#pixelvalue="Digital Numbers"
+
+
 Band1path=arcpy.GetParameterAsText(0)
 Band3path=arcpy.GetParameterAsText(1)
 Band4path=arcpy.GetParameterAsText(2)
