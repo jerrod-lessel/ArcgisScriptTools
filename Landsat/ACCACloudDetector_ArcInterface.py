@@ -33,7 +33,7 @@ except:
     arcpy.AddError(dedent(msg))
     raise arcpy.ExecuteError
 import ACCACloudDetector
-L7bands=[Band2path,Band3path,Band4path,Band5path,Band6path]
+
 
 Band2path=      arcpy.GetParameterAsText(0)
 Band3path=      arcpy.GetParameterAsText(1)
@@ -48,7 +48,10 @@ OutputFileName= arcpy.GetParameterAsText(8)
 
 Filter5Thresh=float(arcpy.GetParameterAsText(9))
 Filter6Thresh=float(arcpy.GetParameterAsText(10))
+SaveRefl=arcpy.GetParameterAsText(11)
 
+
+L7bands=[Band2path,Band3path,Band4path,Band5path,Band6path]
 #checking if the file extension is appropriate and making alterations if necessary
 FileNameSplit=OutputFileName.split(".")
 if FileNameSplit[-1] not in ["tif","img"]:
@@ -60,3 +63,6 @@ if FileNameSplit[-1] not in ["tif","img"]:
         OutputFileName=".".join(FileNameSplit)
 
 arcpy.env.scratchWorkspace=OutputFolder
+
+
+ACCACloudDetector.ACCACloudDetector(L7bands,pixelvalue,OutputFolder+"\\"+OutputFileName,MetaData,SaveRefl,Filter5Thresh,Filter6Thresh)

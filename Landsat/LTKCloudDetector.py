@@ -61,10 +61,10 @@ def LTKCloudDetector(Bands1345, pixelvalue, OutputPath,MetaData="",SaveRefl=True
             ReflOutputPath="\\".join(OutputPath.split("\\")[0:-1])
         else:
             ReflOutputPath=ReflOutputFolder
-        Bands=DNtoReflectance.DNtoReflectance(Bands1345,MetaData,Temporary=ReflTemporary,OutputFolder=ReflOutputPath)
+        Bands=DNtoReflectance.DNtoReflectance(Bands1345,MetaData,Save=SaveRefl,OutputFolder=ReflOutputPath)
 
         for i,raster in enumerate(Bands):
-            if ReflTemporary==False:
+            if SaveRefl==True:
                 exec("Band{0}=arcpy.Raster(raster)".format(["1","3","4","5"][i]))
             else:
                 exec("Band{0}=raster".format(["1","3","4","5"][i]))

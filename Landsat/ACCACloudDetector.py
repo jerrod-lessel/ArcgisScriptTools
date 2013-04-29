@@ -19,7 +19,7 @@ import os
 arcpy.env.overwriteOutput = True
 arcpy.CheckOutExtension("Spatial")
 
-def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False,Filter5Thresh=2.0,Filter5Thresh=2.0):
+def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False,Filter5Thresh=2.0,Filter6Thresh=2.0):
     if pixelvalue=="Digital Numbers":
         for i,pathname in enumerate(L7bands):
             inputbandnum=str(["2","3","4","5","6"][i])
@@ -40,9 +40,9 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
                 arcpy.AddError(msg)
                 print msg
                 raise arcpy.ExecuteError
-        ReflOutputFolder="\\".join(OutputPath.split("\\")[0:-1])
+        OutputFolder="\\".join(OutputPath.split("\\")[0:-1])
 
-        Bands=DNtoReflectance.DNtoReflectance(L7bands,MetaData,Save=SaveRefl,OutputFolder=ReflOutputFolder)
+        Bands=DNtoReflectance.DNtoReflectance(L7bands,MetaData,Save=SaveRefl,OutputFolder=OutputFolder)
 
         for i,raster in enumerate(Bands):
             if SaveRefl==True:
