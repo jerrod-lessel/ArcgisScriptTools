@@ -8,7 +8,7 @@
 # Copyright:   (c) qgeddes 2013
 # Licence:     <your licence>
 #-------------------------------------------------------------------------------
-import SingleBandGapFiller
+import L7GapFiller
 
 
 Scenes=arcpy.GetParameterAsText(0)
@@ -26,4 +26,4 @@ arcpy.env.scratchWorkspace=OutputFolder
 arcpy.CheckOutExtension("Spatial")
 arcpy.env.overwriteOutput=True
 
-SingleBandGapFiller.L7GapFill(Scenes, Output,CloudMasks,Z)
+L7GapFiller.L7GapFill(Scenes, Output,CloudMasks,Z)
