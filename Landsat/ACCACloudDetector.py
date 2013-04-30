@@ -19,7 +19,7 @@ import os
 arcpy.env.overwriteOutput = True
 arcpy.CheckOutExtension("Spatial")
 
-def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False,Filter5Thresh=2.0,Filter6Thresh=2.0):
+def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False,ReflOutputFolder="",Filter5Thresh=2.0,Filter6Thresh=2.0):
     if pixelvalue=="Digital Numbers":
         for i,pathname in enumerate(L7bands):
             inputbandnum=str(["2","3","4","5","6"][i])
@@ -40,9 +40,11 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
                 arcpy.AddError(msg)
                 print msg
                 raise arcpy.ExecuteError
-        OutputFolder="\\".join(OutputPath.split("\\")[0:-1])
-
-        Bands=DNtoReflectance.DNtoReflectance(L7bands,MetaData,Save=SaveRefl,OutputFolder=OutputFolder)
+        if not ReflOutputFolder:
+            ReflOutputPath="\\".join(OutputPath.split("\\")[0:-1])
+        else:
+            ReflOutputPath=ReflOutputFolder
+        Bands=DNtoReflectance.DNtoReflectance(L7bands,MetaData,Save=SaveRefl,OutputFolder=ReflOutputPath)
 
         for i,raster in enumerate(Bands):
             if SaveRefl==True:
@@ -58,7 +60,7 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
     print "Creating Gap Mask"
     #Establishing location of gaps in data. 0= Gap, 1=Data
     GapMask=((Band2>0)*(Band3>0)*(Band4>0)*(Band5>0)*(Band6>0))
-    GapMask.save(OutputFolder+"\\GapMask.tif")
+    GapMask.save(ReflOutputPath+"\\GapMask.tif")
 
     arcpy.AddMessage("First pass underway")
     print "First pass underway"
@@ -98,10 +100,10 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
         arcpy.CalculateStatistics_management(DesertGap,ignore_values="0")
         DesertIndex=DesertGap.mean-1
     except:
-        DesertGap.save(OutputFolder+"\\Desert.tif")
+        DesertGap.save(ReflOutputPath+"\\Desert.tif")
         arcpy.CalculateStatistics_management(DesertGap,ignore_values="0")
         DesertIndex=DesertGap.mean-1
-        os.remove(OutputFolder+"\\Desert.tif")
+        os.remove(ReflOutputPath+"\\Desert.tif")
     del DesertIndMask, DesertGap, NDSI
 
 
@@ -116,10 +118,10 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
         ColdCloudMean=ColdCloudGap.mean-1
         del ColdCloudGap
     except:
-        ColdCloudGap.save(OutputFolder+"\\ColdCloud.tif")
+        ColdCloudGap.save(ReflOutputPath+"\\ColdCloud.tif")
         arcpy.CalculateStatistics_management(ColdCloudGap,ignore_values="0")
         ColdCloudMean=ColdCloudGap.mean-1
-        os.remove(OutputFolder+"\\ColdCloud.tif")
+        os.remove(ReflOutputPath+"\\ColdCloud.tif")
         del ColdCloudGap
 
     del Band2,Band3,Band4,Band5
@@ -135,10 +137,10 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
         SnowPerc=SnowGap.mean-1
         del SnowGap
     except:
-        SnowGap.save(OutputFolder+"\\Snow.tif")
+        SnowGap.save(ReflOutputPath+"\\Snow.tif")
         arcpy.CalculateStatistics_management(SnowGap,ignore_values="0")
         SnowPerc=SnowGap.mean-1
-        os.remove(OutputFolder+"\\Snow.tif")
+        os.remove(ReflOutputPath+"\\Snow.tif")
         del SnowGap
     del Snow
 
@@ -155,12 +157,12 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
     #Collecting statistics for Cloud pixel Temperature values. These will be used in later conditionals
     Tempclouds=Cloudmask*Band6
 
-    Tempclouds.save(OutputFolder+"\\TempClouds.tif")
+    Tempclouds.save(ReflOutputPath+"\\TempClouds.tif")
 
-    Band6array=arcpy.RasterToNumPyArray(OutputFolder+"\\TempClouds.tif")
+    Band6array=arcpy.RasterToNumPyArray(ReflOutputPath+"\\TempClouds.tif")
 
     del Tempclouds
-    os.remove(OutputFolder+"\\TempClouds.tif")
+    os.remove(ReflOutputPath+"\\TempClouds.tif")
     Band6clouds=Band6array[np.where(Band6array>0)]
     del Band6array
     TempMin=Band6clouds.min()
@@ -214,10 +216,10 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
             arcpy.AddMessage("Lower Threshold Used")
 
     #switch legend to 1=good data 0 = cloud pixel
-    Cloudmask=(Cloudmask*GapMask)==0
 
-    Cloudmask.save(OutputFolder+"\\"+OutputFileName)
-    del Cloudmask,GapMask
+    Cloudmask=Reclassify(Cloudmask,"Value",RemapValue([[1,0],[0,1],["NODATA",1]]))
+    Cloudmask.save(OutputPath)
+    del GapMask
 
-    os.remove(OutputFolder+"\\GapMask.tif")
+    os.remove(ReflOutputPath+"\\GapMask.tif")
     return Cloudmask

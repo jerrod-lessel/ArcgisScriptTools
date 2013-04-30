@@ -1,7 +1,7 @@
 DEVELOP ArcGIS Toolbox
 ======================
 
-This toolbox contains script tools for ArcGIS written in Python. The tools automate common processing routines that utilize NASA remotely sensed data.
+This toolbox contains script tools for ArcGIS written in Python. The tools automate geoprocessing routines that utilize NASA remotely sensed data.
 
 
 

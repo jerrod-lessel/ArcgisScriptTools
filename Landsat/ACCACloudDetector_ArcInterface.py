@@ -48,7 +48,8 @@ OutputFileName= arcpy.GetParameterAsText(8)
 
 Filter5Thresh=float(arcpy.GetParameterAsText(9))
 Filter6Thresh=float(arcpy.GetParameterAsText(10))
-SaveRefl=arcpy.GetParameterAsText(11)
+SaveRefl=arcpy.GetParameter(11)
+ReflFolder=arcpy.GetParameterAsText(12)
 
 
 L7bands=[Band2path,Band3path,Band4path,Band5path,Band6path]
@@ -65,4 +66,11 @@ if FileNameSplit[-1] not in ["tif","img"]:
 arcpy.env.scratchWorkspace=OutputFolder
 
 
-ACCACloudDetector.ACCACloudDetector(L7bands,pixelvalue,OutputFolder+"\\"+OutputFileName,MetaData,SaveRefl,Filter5Thresh,Filter6Thresh)
+ACCACloudDetector.ACCACloudDetector(L7bands,
+                                    pixelvalue,
+                                    OutputFolder+"\\"+OutputFileName,
+                                    MetaData,
+                                    SaveRefl,
+                                    ReflFolder,
+                                    Filter5Thresh,
+                                    Filter6Thresh)

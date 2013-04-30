@@ -18,7 +18,7 @@ import DNtoReflectance
 from textwrap import dedent
 arcpy.CheckOutExtension("Spatial")
 
-def LTKCloudDetector(Bands1345, pixelvalue, OutputPath,MetaData="",SaveRefl=True,ReflOutputFolder=""):
+def LTKCloudDetector(Bands1345, pixelvalue, OutputPath,MetaData="",SaveRefl=False,ReflOutputFolder=""):
     """using Landsat 7 bands 1, 3, 4, and 5 to detect cloud using the LTK
     cloud cover classification algorithm"""
 
