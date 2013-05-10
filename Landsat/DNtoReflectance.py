@@ -12,6 +12,33 @@ import math
 
 arcpy.CheckOutExtension("Spatial")
 def DNtoReflectance(Lbands,MetaData,OutputType="Reflectance/Temperature",Save=False,OutputFolder=""):
+    """This function is used to convert Landsat 4,5, or 7 pixel values from
+    digital numbers to Radiance, Reflectance, or Temperature (if using Band 6)
+
+    -----Inputs------
+    Lbands: GeoTIFF files containing individual bands of Landsat imagery. These
+    must have the original names as downloaded and must be from a single scene.
+
+    MetaData: The metadata text file that is downloaded with the Landsat Bands themselves.
+    This may be either the old or new MTL.txt file.
+
+    OutputType: Choose whether the output should be:
+                "Radiance"
+                "Reflectance/Temperature" - Calculates Reflectance for spectral bands
+                                            and Temperature in Kelvin for Thermal bands
+
+    Save: Boolean value that indicates whether the output rasters will be saved permanantly
+            Each band will be saved as an individual GeoTIFF file and be named accoriding to the original filename and the output pixel unit
+
+            *if this is true, then the OutputFolder variable must also be set
+
+    OutputFolder: Folder in which to save the output rasters
+
+    -----Outputs-----
+
+    A list of arcpy raster objects in a sequence that mirrors that of the input Lbands
+
+    """
     OutList=[]
 
     newMeta=['LANDSAT_SCENE_ID = "','DATE_ACQUIRED = ',"SUN_ELEVATION = ",
@@ -99,7 +126,7 @@ def DNtoReflectance(Lbands,MetaData,OutputType="Reflectance/Temperature",Save=Fa
 
             if Save==True:
                 Refraster.save(BandPath)
-                OutList.append(BandPath)
+                OutList.append(arcpy.Raster(BandPath))
             else:
                 OutList.append(Refraster)
             del Refraster,Radraster

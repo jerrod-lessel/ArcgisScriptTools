@@ -47,10 +47,7 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
         Bands=DNtoReflectance.DNtoReflectance(L7bands,MetaData,Save=SaveRefl,OutputFolder=ReflOutputPath)
 
         for i,raster in enumerate(Bands):
-            if SaveRefl==True:
-                exec("Band{0}=arcpy.Raster(raster)".format(["2","3","4","5","6"][i]))
-            else:
-                exec("Band{0}=raster".format(["2","3","4","5","6"][i]))
+            exec("Band{0}=raster".format(["2","3","4","5","6"][i]))
 
     elif pixelvalue=="Reflectance":
         for i,pathname in enumerate(L7bands):
