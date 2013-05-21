@@ -20,10 +20,61 @@ arcpy.env.overwriteOutput = True
 arcpy.CheckOutExtension("Spatial")
 
 def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False,ReflOutputFolder="",Filter5Thresh=2.0,Filter6Thresh=2.0):
+    """This function uses the Automated Cloud Cover Assessment algorithm to classify cloud
+    cover in a Landsat 7 image using spectral bands 2,3,4, and 5 and thermal band 6.
+    The Output image will have binary cell values.  0=cloud, 1= noncloud
+
+    INPUTS----------------
+
+    L7bands: A list of paths to GeoTIFF files containing individual bands of
+             Landsat imagery. The order of these bands must be 2 - 3 - 4 - 5 - 6.
+             These images may have pixel values that correspond to TOA Reflectance
+             or Digital Numbers.If Digital Numbers are provided, then the bands
+             must have the original filenames as downloaded from the USGS
+
+    pixelvalue: Specify whether the pixel values of L7bands represent Reflectance or Digital Numbers
+
+    OutputPath: Destination of the final output cloud mask. This mask must have either the .img or .tif extension
+
+    MetaData: If the pixelvalue is Digital Numbers, this parameter is required for the conversion to TOA reflectance
+
+    SaveRefl: Indicate whethere or not the intermediate reflectance values (if calculated) are saved to disk
+                Default value is False
+
+    ReflOutputFolder: If SaveRefl is True, this parameter indicates where to save Reflectance images.
+                        If SaveRelf is True and this parameter is not provided, the Reflectance images
+                        will be save in the containing folder of the OutputPath
+
+    Filter5Thresh: This threshold will affect the aggressiveness of the cloud classification.
+                    Higher-more aggressive
+                    Lower -less aggressive
+
+    Filter6Thresh: This threshold will affect the aggressiveness of the cloud classification.
+                    Higher-more aggressive
+                    Lower -less aggressive
+
+    OUTPUTS----------------
+
+    The path to a cloud mask for the input image. 0=cloud, 1= noncloud
+    """
+
+
     if pixelvalue=="Digital Numbers":
+        #if pixel values for input bands are Digital Numbers, the following loop will
+        # convert pixel values to TOA Reflectance. If SaveRefl is 'True' the Reflectance
+        #images will be saved in ReflOutputPath. If ReflOutputPath is not provided,
+        # the images will be saved in the containing folder of the OutputPath.
+
         for i,pathname in enumerate(L7bands):
+        #iterating for each input band
+
             inputbandnum=str(["2","3","4","5","6"][i])
+
+            #Checking whether the Band number in the filename matches up with
+            # the appropriate band order band number
+
             try:
+                #attempting to aquire the band number from the filenames
                 BandNum=pathname.split("\\")[-1].split("_B")[1][0]
             except:
                 msg=dedent("""
@@ -40,58 +91,77 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
                 arcpy.AddError(msg)
                 print msg
                 raise arcpy.ExecuteError
+
+        #if ReflOutputFolder is not provided, one is generated using the OutputPath
         if not ReflOutputFolder:
             ReflOutputPath="\\".join(OutputPath.split("\\")[0:-1])
         else:
             ReflOutputPath=ReflOutputFolder
+
+        #Using the DNtoReflectance tool to convert Digital Numbers to Reflectance
         Bands=DNtoReflectance.DNtoReflectance(L7bands,MetaData,Save=SaveRefl,OutputFolder=ReflOutputPath)
 
         for i,raster in enumerate(Bands):
             exec("Band{0}=raster".format(["2","3","4","5","6"][i]))
 
     elif pixelvalue=="Reflectance":
+        #if the pixel values are in Reflectance, the bands are directly inputed in the algorithm
         for i,pathname in enumerate(L7bands):
             exec("Band{0}=arcpy.Raster(pathname)".format(["2","3","4","5","6"][i]))
 
+
+    #Establishing location of gaps in data. 0= Gap, 1=Data
+    #This will be used multiple times in later steps
     arcpy.AddMessage("Creating Gap Mask")
     print "Creating Gap Mask"
-    #Establishing location of gaps in data. 0= Gap, 1=Data
     GapMask=((Band2>0)*(Band3>0)*(Band4>0)*(Band5>0)*(Band6>0))
     GapMask.save(ReflOutputPath+"\\GapMask.tif")
 
+
     arcpy.AddMessage("First pass underway")
     print "First pass underway"
-    #Filter 1 - Brightness Threshold
+
+    #Filter 1 - Brightness Threshold--------------------------------------------
     Cloudmask=Band3 >.08
 
-    #filter 2 - Normalized Snow Difference Index
+    #Filter 2 - Normalized Snow Difference Index--------------------------------
     NDSI=(Band2-Band5)/(Band2+Band5)
     Snow=(NDSI>.6)*Cloudmask
     Cloudmask=(NDSI<.6)*Cloudmask
 
-    #filter 3 - Temperature Threshold
+    #Filter 3 - Temperature Threshold-------------------------------------------
     Cloudmask=(Band6<300)*Cloudmask
 
-    #filter 4 - Band 5/6 Composite
+    #Filter 4 - Band 5/6 Composite----------------------------------------------
     Cloudmask=(((1-Band5)*Band6)<225)*Cloudmask
     Amb=(((1-Band5)*Band6)>225)
 
-    #filter 5 - Band 4/3 Ratio (eliminates vegetation)
-    #**bright cloud tops are sometimes cut out by this filter. original threshold was
-    #2.0 this threshold was bumped to 2.5 to make algorithm more aggresive
+    #Filter 5 - Band 4/3 Ratio (eliminates vegetation)--------------------------
+    #bright cloud tops are sometimes cut out by this filter. original threshold was
+    #raising this threshold will make the algorithm more aggresive
     Cloudmask=((Band4/Band3)<Filter5Thresh)*Cloudmask
     Amb=((Band4/Band3)>Filter5Thresh)*Amb
 
-    #filter 6 - Band 4/2 Ratio (eliminates vegetation)
+    #Filter 6 - Band 4/2 Ratio (eliminates vegetation)--------------------------
+    #bright cloud tops are sometimes cut out by this filter. original threshold was
+    #raising this threshold will make the algorithm more aggresive
     Cloudmask=((Band4/Band2)<Filter6Thresh)*Cloudmask
     Amb=((Band4/Band2)>Filter6Thresh)*Amb
 
-    #filter 7 - Band 4/5 Ratio (Eliminates desert features)
+    #Filter 7 - Band 4/5 Ratio (Eliminates desert features)---------------------
     #   DesertIndex recorded
     DesertIndMask=((Band4/Band5)>1.0)
     Cloudmask=DesertIndMask*Cloudmask
     Amb=((Band4/Band5)<1.0)*Amb
 
+
+
+
+    #Filter 8  Band 5/6 Composite (Seperates warm and cold clouds)--------------
+    WarmCloud=(((1-Band5)*Band6)>210)*Cloudmask
+    ColdCloud=(((1-Band5)*Band6)<210)*Cloudmask
+
+    #Calculating percentage of the scene that is classified as Desert
     DesertGap=(DesertIndMask+1)*GapMask
     try:
         arcpy.CalculateStatistics_management(DesertGap,ignore_values="0")
@@ -104,11 +174,7 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
     del DesertIndMask, DesertGap, NDSI
 
 
-    #Filter 8  Band 5/6 Composite (Seperates warm and cold clouds)
-    WarmCloud=(((1-Band5)*Band6)>210)*Cloudmask
-    ColdCloud=(((1-Band5)*Band6)<210)*Cloudmask
-
-
+    #Calculating percentage of the scene that is classified as Snow
     ColdCloudGap=(ColdCloud+1)*GapMask
     try:
         arcpy.CalculateStatistics_management(ColdCloudGap,ignore_values="0")
@@ -124,10 +190,6 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
     del Band2,Band3,Band4,Band5
 
 
-    #Determining whether or not snow is present and adjusting the Cloudmask
-    #accordinging. If snow is present the Warm Clouds are reclassfied as ambigious
-
-
     SnowGap=(Snow+1)*GapMask
     try:
         arcpy.CalculateStatistics_management(SnowGap,ignore_values="0")
@@ -141,9 +203,8 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
         del SnowGap
     del Snow
 
-
-
-
+    #Determining whether or not snow is present and adjusting the Cloudmask
+    #accordinging. If snow is present the Warm Clouds are reclassfied as ambigious
     if SnowPerc>.01:
         SnowPresent=True
         Cloudmask=ColdCloud
@@ -155,11 +216,10 @@ def ACCACloudDetector(L7bands, pixelvalue, OutputPath,MetaData="",SaveRefl=False
     Tempclouds=Cloudmask*Band6
 
     Tempclouds.save(ReflOutputPath+"\\TempClouds.tif")
-
     Band6array=arcpy.RasterToNumPyArray(ReflOutputPath+"\\TempClouds.tif")
-
     del Tempclouds
     os.remove(ReflOutputPath+"\\TempClouds.tif")
+
     Band6clouds=Band6array[np.where(Band6array>0)]
     del Band6array
     TempMin=Band6clouds.min()

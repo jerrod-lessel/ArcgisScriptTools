@@ -19,8 +19,35 @@ from textwrap import dedent
 arcpy.CheckOutExtension("Spatial")
 
 def LTKCloudDetector(Bands1345, pixelvalue, OutputPath,MetaData="",SaveRefl=False,ReflOutputFolder=""):
-    """using Landsat 7 bands 1, 3, 4, and 5 to detect cloud using the LTK
-    cloud cover classification algorithm"""
+    """This function uses the LTK algorithm to classify cloud
+    cover in a Landsat 7 image using spectral bands 1, 3, 4, and 5.
+    The Output image will have binary cell values.  0=cloud, 1= noncloud
+
+    INPUTS----------------
+
+    L7bands: A list of paths to GeoTIFF files containing individual bands of
+             Landsat imagery. The order of these bands must be 1 - 3 - 4 - 5.
+             These images may have pixel values that correspond to TOA Reflectance
+             or Digital Numbers.If Digital Numbers are provided, then the bands
+             must have the original filenames as downloaded from the USGS
+
+    pixelvalue: Specify whether the pixel values of L7bands represent Reflectance or Digital Numbers
+
+    OutputPath: Destination of the final output cloud mask. This mask must have either the .img or .tif extension
+
+    MetaData: If the pixelvalue is Digital Numbers, this parameter is required for the conversion to TOA reflectance
+
+    SaveRefl: Indicate whethere or not the intermediate reflectance values (if calculated) are saved to disk
+                Default value is False
+
+    ReflOutputFolder: If SaveRefl is True, this parameter indicates where to save Reflectance images.
+                        If SaveRelf is True and this parameter is not provided, the Reflectance images
+                        will be save in the containing folder of the OutputPath
+
+    OUTPUTS----------------
+
+    The path to a cloud mask for the input image. 0=cloud, 1= noncloud
+    """
 
     #checking if the file extension is appropriate and making alterations if necessary
     FileNameSplit=OutputPath.split(".")
@@ -38,10 +65,18 @@ def LTKCloudDetector(Bands1345, pixelvalue, OutputPath,MetaData="",SaveRefl=Fals
 
 
     if pixelvalue=="Digital Numbers":
+        #if pixel values for input bands are Digital Numbers, the following loop will
+        # convert pixel values to TOA Reflectance. If SaveRefl is 'True' the Reflectance
+        #images will be saved in ReflOutputPath. If ReflOutputPath is not provided,
+        # the images will be saved in the containing folder of the OutputPath.
         for i,pathname in enumerate(Bands1345):
             inputbandnum=str(["1","3","4","5"][i])
             try:
                 BandNum=pathname.split("\\")[-1].split("_B")[1][0]
+
+
+            #Checking whether the Band number in the filename matches up with
+            # the appropriate band order band number
             except:
                 msg=dedent("""
                 Error reading Band {0}.
