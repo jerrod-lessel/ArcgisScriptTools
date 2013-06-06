@@ -28,7 +28,8 @@ def DNtoReflectance(Lbands,MetaData,OutputType="Reflectance/Temperature",Save=Fa
                                             and Temperature in Kelvin for Thermal bands
 
     Save: Boolean value that indicates whether the output rasters will be saved permanantly
-            Each band will be saved as an individual GeoTIFF file and be named accoriding to the original filename and the output pixel unit
+            Each band will be saved as an individual GeoTIFF file and be named
+            accoriding to the original filename and the output pixel unit
 
             *if this is true, then the OutputFolder variable must also be set
 
@@ -41,6 +42,8 @@ def DNtoReflectance(Lbands,MetaData,OutputType="Reflectance/Temperature",Save=Fa
     """
     OutList=[]
 
+    #These lists will be used to parse the meta data text file and locate relevant information
+    #metadata format was changed August 29, 2012. This tool can process either the new or old format
     newMeta=['LANDSAT_SCENE_ID = "','DATE_ACQUIRED = ',"SUN_ELEVATION = ",
             "RADIANCE_MAXIMUM_BAND_{0} = ","RADIANCE_MINIMUM_BAND_{0} = ",
             "QUANTIZE_CAL_MAX_BAND_{0} = ","QUANTIZE_CAL_MIN_BAND_{0} = "]
@@ -51,12 +54,17 @@ def DNtoReflectance(Lbands,MetaData,OutputType="Reflectance/Temperature",Save=Fa
     f=open(MetaData)
     MText=f.read()
 
+    #the presence of a PRODUCT_CREATION_TIME category is used to identify old metadata
+    #if this is not present, the meta data is considered new.
+    #Band6length refers to the length of the Band 6 name string. In the new metadata this string is longer
     if "PRODUCT_CREATION_TIME" in MText:
         Meta=oldMeta
         Band6length=2
     else:
         Meta=newMeta
         Band6length=8
+
+    #The tilename is located using the newMeta/oldMeta indixes and the date of capture is recorded
     if Meta==newMeta:
         TileName=MText.split(Meta[0])[1].split('"')[0]
         year=TileName[9:13]
@@ -68,6 +76,9 @@ def DNtoReflectance(Lbands,MetaData,OutputType="Reflectance/Temperature",Save=Fa
 
     date=MText.split(Meta[1])[1].split('\n')[0]
 
+
+    #the spacecraft from which the imagery was capture is identified
+    #this info determines the solar exoatmospheric irradiance (ESun) for each band
     spacecraft=MText.split('SPACECRAFT_ID = "')[1].split('"')[0]
     if   "7" in spacecraft: ESun=(1969.0,1840.0,1551.0,1044.0,255.700,0.,82.07,1368.00)
     elif "5" in spacecraft: ESun=(1957.0,1826.0,1554.0,1036.0,215.0  ,0.,80.67)
@@ -76,15 +87,18 @@ def DNtoReflectance(Lbands,MetaData,OutputType="Reflectance/Temperature",Save=Fa
         arcpy.AddError("This tool only works for Landsat 4, 5, or 7")
         raise arcpy.ExecuteError()
 
-    #determing if year is leap year
+    #determing if year is leap year and setting the Days in year accordingly
     if float(year) % 4 ==0: DIY=366.
     else:DIY=365.
 
+    #using the date to determing the distance from the sun
     theta =2*math.pi*float(jday)/DIY
 
-    dSun2 = 1.00011 + 0.034221*math.cos(theta) + 0.001280*math.sin(theta) + 0.000719*math.cos(2*theta)+ 0.000077*math.sin(2*theta)
+    dSun2 = (1.00011 + 0.034221*math.cos(theta) + 0.001280*math.sin(theta) +
+             0.000719*math.cos(2*theta)+ 0.000077*math.sin(2*theta) )
 
     SZA=90.-float(MText.split(Meta[2])[1].split("\n")[0])
+
 
     #Calculating values for each band
     for pathname in Lbands:
@@ -94,6 +108,7 @@ def DNtoReflectance(Lbands,MetaData,OutputType="Reflectance/Temperature",Save=Fa
             arcpy.AddError(msg)
             print msg
             raise arcpy.ExecuteError
+
         #changing Band 6 name to match metadata
         if BandNum=="6" and spacecraft[8]=="7":
             BandNum=pathname.split("\\")[-1].split("B")[1][0:Band6length]
@@ -102,6 +117,8 @@ def DNtoReflectance(Lbands,MetaData,OutputType="Reflectance/Temperature",Save=Fa
         print "Processing Band {0}".format(BandNum)
 
         Oraster=arcpy.Raster(pathname)
+
+        #using the oldMeta/newMeta indixes to pull the min/max for radiance/Digital numbers
         LMax=   float(MText.split(Meta[3].format(BandNum))[1].split("\n")[0])
         LMin=   float(MText.split(Meta[4].format(BandNum))[1].split("\n")[0])
         QCalMax=float(MText.split(Meta[5].format(BandNum))[1].split("\n")[0])
