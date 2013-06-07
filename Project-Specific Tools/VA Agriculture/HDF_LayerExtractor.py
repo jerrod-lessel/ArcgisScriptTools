@@ -9,7 +9,6 @@
 #-------------------------------------------------------------------------------
 import arcpy
 import numpy as np
-from osgeo import gdal
 import h5py
 from math import pi
 
