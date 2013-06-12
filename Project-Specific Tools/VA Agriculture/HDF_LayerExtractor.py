@@ -5,8 +5,8 @@
 # Author:       Quinten Geddes    Quinten.A.Geddes@nasa.gov
 #                   NASA DEVELOP Program
 # Created:     22/03/2013
-
 #-------------------------------------------------------------------------------
+
 import arcpy
 import numpy as np
 import h5py
@@ -61,7 +61,7 @@ for i in layers:
 ##
 ##    ------------------------
 
-    #if exclude Zero is true. Zeros are converted to
+    #if exclude Zero is true. Zeros are converted to nodata
     if excludeZero==True:
         arcpy.CopyRaster_management(output,outputfilename,nodata_value=0)
     else:

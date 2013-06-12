@@ -22,4 +22,4 @@ OutputFolder=arcpy.GetParameterAsText(3)
 #Reading Metadata that pertains to all bands
 Lbands=Lbands.split(";")
 
-DNtoReflectance.DNtoReflectance(Lbands,MetaData,OutputType,False,OutputFolder)
+DNtoReflectance.DNtoReflectance(Lbands,MetaData,OutputType,True,OutputFolder)

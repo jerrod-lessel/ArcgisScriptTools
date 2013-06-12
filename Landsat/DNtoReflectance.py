@@ -10,6 +10,8 @@
 import arcpy
 import math
 
+##L7Reflectance C:\Users\qgeddes\Downloads\Landsat\tooltest\LE71720832011270ASN00_B1.TIF C:\Users\qgeddes\Downloads\Landsat\tooltest\LE71720832011270ASN00_MTL.txt Reflectance/Temperature C:\Users\qgeddes\Downloads\Landsat\tooltest\Refl
+
 arcpy.CheckOutExtension("Spatial")
 def DNtoReflectance(Lbands,MetaData,OutputType="Reflectance/Temperature",Save=False,OutputFolder=""):
     """This function is used to convert Landsat 4,5, or 7 pixel values from
